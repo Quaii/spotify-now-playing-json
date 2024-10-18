@@ -5,6 +5,9 @@ on:
     - cron: '*/5 * * * *'  # Runs every 5 minutes
   workflow_dispatch:  # Allows you to manually trigger the action
 
+permissions:
+  contents: write  # Allow the workflow to write to the repository
+
 jobs:
   update-json:
     runs-on: ubuntu-latest
@@ -35,6 +38,4 @@ jobs:
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git add data.json
         git commit -m "Update now playing song" || echo "No changes to commit"
-        git push origin main
-
-
+        git push https://x-access-token:${GITHUB_TOKEN}@github.com/Quaii/spotify-now-playing-json.git HEAD:main
