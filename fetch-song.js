@@ -2,17 +2,10 @@ const fs = require('fs');
 const axios = require('axios');
 const qs = require('querystring');
 
+// Replace these with your Spotify API credentials
 const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
 const CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
-const REDIRECT_URI = 'http://localhost/callback'; // Change this to your actual redirect URI
-
-let accessToken = ''; // Variable to store the access token
-let refreshToken = ''; // Variable to store the refresh token
-
-// Step 1: Get authorization code manually from Spotify
-// You will need to visit this URL to get the authorization code
-// const AUTH_URL = `https://accounts.spotify.com/authorize?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${REDIRECT_URI}&scope=user-read-playback-state`;
-// console.log(AUTH_URL);
+const REDIRECT_URI = 'https://quaii.github.io/spotify-now-playing-json/'; // Your GitHub Pages URL
 
 async function getAccessToken(code) {
     const tokenURL = 'https://accounts.spotify.com/api/token';
@@ -30,15 +23,18 @@ async function getAccessToken(code) {
 
     try {
         const response = await axios.post(tokenURL, qs.stringify(data), { headers });
-        accessToken = response.data.access_token;
-        refreshToken = response.data.refresh_token; // Save refresh token for later use
-        console.log('Access token retrieved.');
+        return {
+            accessToken: response.data.access_token,
+            refreshToken: response.data.refresh_token // Save refresh token for later use
+        };
     } catch (error) {
         console.error('Error fetching access token:', error.response.data);
+        return null;
     }
 }
 
-async function fetchCurrentlyPlaying() {
+// Function to fetch currently playing track
+async function fetchCurrentlyPlaying(accessToken) {
     const url = 'https://api.spotify.com/v1/me/player/currently-playing';
 
     const headers = {
@@ -62,12 +58,15 @@ async function fetchCurrentlyPlaying() {
     }
 }
 
+// Main function to update the JSON file
 async function updateJSON() {
-    // You need to manually get the access token first
-    // const code = 'YOUR_AUTHORIZATION_CODE'; // Replace with the code you get after authorizing your app
-    // await getAccessToken(code); // Uncomment this line and provide the code
+    // Replace 'YOUR_AUTHORIZATION_CODE' with the actual code obtained from Spotify
+    const code = 'AQDaRkS0vuAt3H-IGM7vQYExYBdec6Ue77Xc2SNzjpZ1F8SfBDFpN5R5blorvu1WCB-ZMwUPGKfN8TH8bu51vwJhWHd_elzS8XwWXs0lc8aldwwIrMdzDUC_dFBszqP-FECv0pnmP5emeUFP6HgLHQ8dVT4G2eapCvMS2sGXhnE86f-PZBti0UZ9SBUwdCnF_Vs8Rb_sH5FFDg64fgKj1ZCcMFgxbI9D5Ff4DRm95Q'; // Replace with the code from your URL
+    const tokens = await getAccessToken(code);
 
-    const songData = await fetchCurrentlyPlaying();
+    if (!tokens) return; // If token retrieval failed, exit
+
+    const songData = await fetchCurrentlyPlaying(tokens.accessToken);
     if (songData) {
         fs.writeFileSync('data.json', JSON.stringify(songData, null, 2));
         console.log('JSON updated with current song data.');
@@ -76,5 +75,5 @@ async function updateJSON() {
     }
 }
 
-// Call updateJSON function
+// Call the updateJSON function
 updateJSON();
