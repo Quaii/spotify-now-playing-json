@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Current Spotify Track</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        img {
+            max-width: 300px;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Currently Playing Track</h1>
+    <div id="song-info">
+        <img id="album-art" alt="Album Art" />
+        <h2 id="track-name"></h2>
+        <h3 id="artist-name"></h3>
+    </div>
+
+    <script>
+        async function fetchCurrentSong() {
+            const response = await fetch('data.json');
+            const data = await response.json();
+            
+            document.getElementById('track-name').innerText = data.track || 'No track playing';
+            document.getElementById('artist-name').innerText = data.artist || '';
+            document.getElementById('album-art').src = data.albumArt || '';
+        }
+
+        fetchCurrentSong();
+    </script>
+</body>
+</html>
