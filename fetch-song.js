@@ -33,7 +33,6 @@ async function getAccessToken(code) {
     }
 }
 
-// Function to fetch currently playing track
 async function fetchCurrentlyPlaying(accessToken) {
     const url = 'https://api.spotify.com/v1/me/player/currently-playing';
 
@@ -43,6 +42,7 @@ async function fetchCurrentlyPlaying(accessToken) {
 
     try {
         const response = await axios.get(url, { headers });
+        console.log("API Response:", response.data); // Debugging line
         if (response.data && response.data.item) {
             const track = response.data.item;
             return {
@@ -51,14 +51,13 @@ async function fetchCurrentlyPlaying(accessToken) {
                 album_art: track.album.images[0].url
             };
         }
-        return null;
+        return null; // Return null if no track is playing
     } catch (error) {
         console.error('Error fetching currently playing track:', error.response.data);
         return null;
     }
 }
 
-// Main function to update the JSON file
 async function updateJSON() {
     // Replace 'YOUR_AUTHORIZATION_CODE' with the actual code obtained from Spotify
     const code = 'AQDaRkS0vuAt3H-IGM7vQYExYBdec6Ue77Xc2SNzjpZ1F8SfBDFpN5R5blorvu1WCB-ZMwUPGKfN8TH8bu51vwJhWHd_elzS8XwWXs0lc8aldwwIrMdzDUC_dFBszqP-FECv0pnmP5emeUFP6HgLHQ8dVT4G2eapCvMS2sGXhnE86f-PZBti0UZ9SBUwdCnF_Vs8Rb_sH5FFDg64fgKj1ZCcMFgxbI9D5Ff4DRm95Q'; // Replace with the code from your URL
@@ -69,7 +68,7 @@ async function updateJSON() {
     const songData = await fetchCurrentlyPlaying(tokens.accessToken);
     if (songData) {
         fs.writeFileSync('data.json', JSON.stringify(songData, null, 2));
-        console.log('JSON updated with current song data.');
+        console.log('JSON updated with current song data:', songData);
     } else {
         console.log('No track is currently playing.');
     }
